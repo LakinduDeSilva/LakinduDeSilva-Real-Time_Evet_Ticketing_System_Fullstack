@@ -5,29 +5,32 @@ import com.lakindu.Real_Time_Event_Ticketing_System.models.Vendor;
 import com.lakindu.Real_Time_Event_Ticketing_System.utils.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * WebSocketTicketHandler handles WebSocket connections and manages the ticketing process.
+ */
 @Component
 public class WebSocketTicketHandler implements WebSocketHandler {
-
     private List<Integer> tickets; // Use ArrayList to store tickets
     private int maxCapacity;
     private static final Logger logger = Logger.getLogger(WebSocketTicketHandler.class.getName());
-
     private Thread vendorThread1;
     private Thread vendorThread2;
     private Thread customerThread1;
     private Thread customerThread2;
-
     private WebSocketSession session; // Store the WebSocket session
 
     private volatile boolean isRunning = true; // Flag to control thread execution
 
-    // Start the ticketing process with configuration
+    /**
+     * Starts the ticketing process with the given configuration.
+     *
+     * @param config the configuration for the ticketing process
+     */
     public void startTicketing(Configuration config) {
         this.maxCapacity = config.getMaxTicketCapacity();
         this.tickets = Collections.synchronizedList(new ArrayList<>());
@@ -54,7 +57,9 @@ public class WebSocketTicketHandler implements WebSocketHandler {
         System.out.println("Ticketing process started successfully.");
     }
 
-    // Stop the ticketing process
+    /**
+     * Stops the ticketing process.
+     */
     public void stopTicketing() {
         isRunning = false; // Set the flag to false to stop threads
 
@@ -83,18 +88,24 @@ public class WebSocketTicketHandler implements WebSocketHandler {
         customerThread1 = null;
         customerThread2 = null;
 
-        sendMessageToClient("Ticketing process has been stopped.");
+        sendMessageToFrontend("Ticketing process has been stopped.");
         System.out.println("Ticketing process has been stopped.");
     }
 
+    /**
+     * Adds a ticket to the pool.
+     *
+     * @param ticket the ticket to be added
+     * @param vendorId the ID of the vendor adding the ticket
+     */
     public synchronized void addTickets(int ticket, int vendorId) {
         while (tickets.size() >= maxCapacity) {
             if (!isRunning) return; // Exit if the system is stopping
             try {
                 String message = "TicketPool is full. Vendor " + vendorId + " is waiting to add Ticket " + ticket;
                 logger.info(message);
-                sendMessageToClient(message);
-                sendMessageToClient(String.valueOf(tickets.size()));
+                sendMessageToFrontend(message);
+                sendMessageToFrontend(String.valueOf(tickets.size()));
                 wait(); // Wait until there is space in the pool
             } catch (InterruptedException e) {
                 logger.warning("Vendor " + vendorId + " interrupted while waiting.");
@@ -106,18 +117,23 @@ public class WebSocketTicketHandler implements WebSocketHandler {
         tickets.add(ticket);
         String message = "Ticket " + ticket + " added by Vendor " + vendorId + " | Remaining Total Tickets: " + tickets.size();
         logger.info(message);
-        sendMessageToClient(String.valueOf(tickets.size()));
-        sendMessageToClient(message);
+        sendMessageToFrontend(String.valueOf(tickets.size()));
+        sendMessageToFrontend(message);
         notifyAll();
     }
 
+    /**
+     * Removes a ticket from the pool.
+     *
+     * @param customerId the ID of the customer removing the ticket
+     */
     public synchronized void removeTicket(int customerId) {
         while (tickets.isEmpty()) {
             if (!isRunning) return; // Exit if the system is stopping
             try {
                 String message = "No tickets available. Waiting for tickets...";
                 logger.info(message);
-                sendMessageToClient(message);
+                sendMessageToFrontend(message);
                 wait();
             } catch (InterruptedException e) {
                 logger.warning("Customer " + customerId + " interrupted.");
@@ -129,12 +145,17 @@ public class WebSocketTicketHandler implements WebSocketHandler {
         int ticket = tickets.removeFirst();
         String message = "Ticket " + ticket + " bought by Customer " + customerId + " | Remaining Total Tickets: " + tickets.size();
         logger.info(message);
-        sendMessageToClient(message);
-        sendMessageToClient(String.valueOf(tickets.size()));
+        sendMessageToFrontend(message);
+        sendMessageToFrontend(String.valueOf(tickets.size()));
         notifyAll();
     }
 
-    public void sendMessageToClient(String message) {
+    /**
+     * Sends a message to the frontend via WebSocket.
+     *
+     * @param message the message to be sent
+     */
+    public void sendMessageToFrontend(String message) {
         if (session != null && session.isOpen()) {
             try {
                 session.sendMessage(new TextMessage(message));
@@ -147,7 +168,7 @@ public class WebSocketTicketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         this.session = session; // Save the session for sending messages
-        sendMessageToClient("Connection established.");
+        sendMessageToFrontend("Connection established.");
     }
 
     @Override
@@ -172,4 +193,3 @@ public class WebSocketTicketHandler implements WebSocketHandler {
         return false;
     }
 }
-

@@ -2,6 +2,20 @@ import React, { useState, useEffect } from 'react';
 import ConfigPopup from './ConfigPopup';
 import './App.css';
 
+/**
+ * Home component that displays the ticket counter and manages the ticketing process.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Object} props.configuration - The configuration object.
+ * @param {Function} props.onUpdateConfiguration - Function to update the configuration.
+ * @example
+ * const configuration = { totalTickets: 100, releaseRate: 10, buyingRate: 5, maxCapacity: 50 };
+ * const onUpdateConfiguration = (newConfig) => { ... };
+ * return (
+ *   <Home configuration={configuration} onUpdateConfiguration={onUpdateConfiguration} />
+ * )
+ */
 function Home({ configuration, onUpdateConfiguration }) {
   const [counter, setCounter] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -24,12 +38,13 @@ function Home({ configuration, onUpdateConfiguration }) {
       }
     };
 
-    // Clean up the WebSocket connection when the component unmounts
-    // return () => {
-    //   socket.close();
-    // };
   }, []); // Empty dependency array ensures this effect runs only once
 
+  /**
+   * Function to start the ticketing process by sending a request to the backend.
+   *
+   * @async
+   */
   const startTicketing = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/ticketing/start', {
@@ -50,6 +65,11 @@ function Home({ configuration, onUpdateConfiguration }) {
     }
   };
 
+  /**
+   * Function to stop the ticketing process by sending a request to the backend.
+   *
+   * @async
+   */
   const stopTicketing = async () => {
     try {
       const response = await fetch('http://localhost:8080/api/ticketing/stop', {
@@ -73,6 +93,7 @@ function Home({ configuration, onUpdateConfiguration }) {
 
   return (
     <div className="App">
+      <h1>Welcome to Real-Time Event Ticketing System</h1>
       <div className="counter-display">
         <h1>{counter}</h1>
       </div>
@@ -104,9 +125,9 @@ function Home({ configuration, onUpdateConfiguration }) {
         <h3>Current Configuration</h3>
         <ul>
           <li>Total Tickets: {configuration.totalTickets}</li>
-          <li>Release Rate: {configuration.releaseRate}</li>
-          <li>Buying Rate: {configuration.buyingRate}</li>
-          <li>Max Capacity: {configuration.maxCapacity}</li>
+          <li>Release Rate : {configuration.releaseRate}</li>
+          <li>Buying Rate  : {configuration.buyingRate}</li>
+          <li>Max Capacity : {configuration.maxCapacity}</li>
         </ul>
       </div>
       {showPopup && (

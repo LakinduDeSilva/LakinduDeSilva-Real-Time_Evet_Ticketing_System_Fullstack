@@ -16,14 +16,23 @@ public class ConfigurationController {
     @Autowired
     private ConfigurationService configurationService;
 
-    // Endpoint to save configuration
+    /**
+     * Endpoint to save configuration.
+     *
+     * @param config the configuration object to be saved
+     * @return a ResponseEntity with the result of the save operation
+     */
     @PostMapping("/save")
     public ResponseEntity<String> saveConfiguration(@RequestBody Configuration config) {
         String result = configurationService.saveConfiguration(config);
         return ResponseEntity.ok(result);
     }
 
-    // Endpoint to load configuration
+    /**
+     * Endpoint to load configuration.
+     *
+     * @return a ResponseEntity with the loaded configuration or an error message if not found
+     */
     @GetMapping("/load")
     public ResponseEntity<Map<String, Object>> loadConfiguration() {
         Configuration config = configurationService.loadConfigurationObject();

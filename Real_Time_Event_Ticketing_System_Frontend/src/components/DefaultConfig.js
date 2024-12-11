@@ -5,6 +5,11 @@ function DefaultConfig({ onLoad }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  /**
+     * Default configuration settings for the application.
+     *
+     * @module DefaultConfig
+     */
   const loadConfiguration = async () => {
     setLoading(true);
     setError(null);
@@ -12,21 +17,32 @@ function DefaultConfig({ onLoad }) {
       const response = await axios.get('http://localhost:8080/api/config/load'); // Adjust this based on your backend
       const { data } = response;
 
-      // Parse response and create a configuration object
+    /**
+     * Default configuration object.
+     *
+     * @type {Object}
+     * @property {number} totalTickets - The total number of tickets available.
+     * @property {number} releaseRate - The rate at which tickets are released.
+     * @property {number} buyingRate - The rate at which tickets are bought.
+     * @property {number} maxCapacity - The maximum capacity of the system.
+     */
       const config = {
         totalTickets: data.totalTickets,
         releaseRate: data.ticketReleaseRate,
         buyingRate: data.customerRetrievalRate,
         maxCapacity: data.maxTicketCapacity,
       };
-      console.log(config)
-      // console.log("totalTickets:",data.totalTickets)
-      // console.log("releaseRate:", data.ticketReleaseRate)
-      // console.log("buyingRate:" ,data.customerRetrievalRate)
-      // console.log("maxCapacity:", data.maxTicketCapacity)
 
+      console.log("Load Configuration Successfully")
+      console.log(config)
       onLoad(config);
+
     } catch (err) {
+    /**
+     * Error message displayed when the configuration fails to load.
+     *
+     * @type {string}
+     */
       console.error('Error loading configuration:', err);
       setError('Failed to load configuration. Please try again later.');
     } finally {

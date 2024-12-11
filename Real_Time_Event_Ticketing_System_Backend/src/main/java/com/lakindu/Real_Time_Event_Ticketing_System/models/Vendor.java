@@ -1,9 +1,12 @@
 package com.lakindu.Real_Time_Event_Ticketing_System.models;
 
 import com.lakindu.Real_Time_Event_Ticketing_System.services.WebSocketTicketHandler;
-
 import java.util.logging.Logger;
 
+/**
+ * Vendor class represents a vendor in the ticketing system.
+ * Implements Runnable to allow vendor actions to be executed in a separate thread.
+ */
 public class Vendor implements Runnable {
     private final int vendorId;
     private final WebSocketTicketHandler ticketPool;
@@ -14,6 +17,14 @@ public class Vendor implements Runnable {
     private static final Object lock = new Object();
     public static Boolean allReleased = false;
 
+    /**
+     * Constructor for Vendor.
+     *
+     * @param vendorId the unique ID of the vendor
+     * @param ticketPool the WebSocketTicketHandler managing the ticket pool
+     * @param ticketReleaseRate the rate at which the vendor releases tickets
+     * @param totalTickets the total number of tickets to be released by the vendor
+     */
     public Vendor(int vendorId, WebSocketTicketHandler ticketPool, int ticketReleaseRate, int totalTickets) {
         this.vendorId = vendorId;
         this.ticketPool = ticketPool;
@@ -21,13 +32,22 @@ public class Vendor implements Runnable {
         this.totalTickets = totalTickets;
     }
 
+    /**
+     * Gets the current ticket ID and increments it.
+     *
+     * @return the current ticket ID
+     */
     public static synchronized int getCurrentTicketId() {
         return currentTicketId++;
     }
 
+    /**
+     * The run method contains the logic for the vendor's actions.
+     * Continuously releases tickets to the ticket pool at the specified rate until all tickets are released.
+     */
     @Override
     public void run() {
-        while (currentTicketId<=totalTickets){
+        while (currentTicketId <= totalTickets) {
             synchronized (lock) {
                 try {
                     Thread.sleep(ticketReleaseRate);
@@ -45,10 +65,13 @@ public class Vendor implements Runnable {
             }
         }
         changeAllReleased();
-
     }
-    public void changeAllReleased(){
-        System.out.println("Vendor "+vendorId + " has released all tickets.");
-        allReleased=true;
+
+    /**
+     * Changes the allReleased flag to true and logs that all tickets have been released.
+     */
+    public void changeAllReleased() {
+        System.out.println("Vendor " + vendorId + " has released all tickets.");
+        allReleased = true;
     }
 }
