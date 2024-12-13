@@ -30,6 +30,6 @@ A full-stack real-time event ticketing system with a React.js frontend and a Spr
 
 ### Installation
 #### Backend Setup
-1. Clone the backend repository:
+1. Clone the full stack repository:
    ```bash
    git clone https://github.com/LakinduDeSilva/LakinduDeSilva-Real-Time_Evet_Ticketing_System_Fullstack.git
